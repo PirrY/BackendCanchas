@@ -1,11 +1,8 @@
 package com.cotrini.api_canchas.services;
 
-import com.cotrini.api_canchas.dto.SedeDTO;
-import com.cotrini.api_canchas.dto.TipoCanchaDTO;
+import com.cotrini.api_canchas.dto.*;
 import com.cotrini.api_canchas.entities.Cancha;
-import com.cotrini.api_canchas.repositories.CanchaRepository;
-import com.cotrini.api_canchas.repositories.SedeRepository;
-import com.cotrini.api_canchas.repositories.TipoCanchaRepository;
+import com.cotrini.api_canchas.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +16,6 @@ public class CanchaService {
     private final CanchaRepository canchaRepository;
     private final SedeRepository sedeRepository;
     private final TipoCanchaRepository tipoCanchaRepository;
-
-    public List<Cancha> obtenerCanchas(Long sedeId, Long tipoCanchaId) {
-        if (sedeId != null && tipoCanchaId != null) {
-            return canchaRepository.findBySedeIdAndTipoCanchaId(sedeId, tipoCanchaId);
-        } else if (sedeId != null) {
-            return canchaRepository.findBySedeId(sedeId);
-        } else if (tipoCanchaId != null) {
-            return canchaRepository.findByTipoCanchaId(tipoCanchaId);
-        }
-        return canchaRepository.findAll();
-    }
 
     public List<SedeDTO> obtenerSedes() {
         return sedeRepository.findAll().stream().map(sede -> {
@@ -47,5 +33,33 @@ public class CanchaService {
             dto.setNombre(tipo.getNombre());
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    public List<CanchaResponseDTO> obtenerCanchas(Long sedeId, Long tipoCanchaId) {
+        List<Cancha> canchas;
+
+        if (sedeId != null && tipoCanchaId != null) {
+            canchas = canchaRepository.findBySedeIdAndTipoCanchaId(sedeId, tipoCanchaId);
+        } else if (sedeId != null) {
+            canchas = canchaRepository.findBySedeId(sedeId);
+        } else if (tipoCanchaId != null) {
+            canchas = canchaRepository.findByTipoCanchaId(tipoCanchaId);
+        } else {
+            canchas = canchaRepository.findAll();
+        }
+
+        return canchas.stream().map(this::mapearACanchaDTO).collect(Collectors.toList());
+    }
+
+    private CanchaResponseDTO mapearACanchaDTO(Cancha cancha) {
+        CanchaResponseDTO dto = new CanchaResponseDTO();
+        dto.setId(cancha.getId());
+        dto.setNombre(cancha.getNombre());
+        dto.setDescripcion(cancha.getDescripcion());
+        dto.setCapacidad(cancha.getCapacidad());
+        dto.setImagenUrl(cancha.getImagenUrl());
+        dto.setNombreSede(cancha.getSede().getNombre());
+        dto.setNombreTipoCancha(cancha.getTipoCancha().getNombre());
+        return dto;
     }
 }
