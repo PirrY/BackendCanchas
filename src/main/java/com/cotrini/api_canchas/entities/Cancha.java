@@ -16,7 +16,7 @@ public class Cancha {
     private String nombre;
     private String descripcion;
     private Integer capacidad;
-    private Double precio;
+    private String imagenUrl;
 
     @ManyToOne
     @JoinColumn(name = "sede_id", nullable = false)

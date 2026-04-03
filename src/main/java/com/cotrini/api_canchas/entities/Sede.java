@@ -15,5 +15,4 @@ public class Sede {
 
     private String nombre;
     private String direccion;
-    private String ciudad;
 }

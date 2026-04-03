@@ -15,7 +15,6 @@ public class Reserva {
     private Long id;
 
     private LocalDate fecha;
-    private String estado;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
