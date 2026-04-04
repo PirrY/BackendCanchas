@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,18 @@ public class ReservaService {
     private final HorarioRepository horarioRepository;
     private final CanchaRepository canchaRepository;
     private final UsuarioRepository usuarioRepository;
+
+    public List<Horario> obtenerHorariosDisponibles(Long canchaId, LocalDate fecha) {
+        List<Horario> todosLosHorarios = horarioRepository.findAll();
+        List<Long> horariosOcupados = reservaRepository.findByCanchaIdAndFecha(canchaId, fecha)
+                .stream()
+                .map(res -> res.getHorario().getId())
+                .collect(Collectors.toList());
+
+        return todosLosHorarios.stream()
+                .filter(h -> !horariosOcupados.contains(h.getId()))
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public ReservaResponseDTO crearReserva(ReservaRequestDTO request, String correoUsuario) {
