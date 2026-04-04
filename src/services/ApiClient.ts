@@ -1,54 +1,49 @@
 import * as SecureStore from "expo-secure-store";
+import axios from "axios";
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
+const http = axios.create({
+  baseURL: process.env.EXPO_PUBLIC_API_URL ?? "",
+  headers: { "Content-Type": "application/json" },
+});
 
-async function request<T>(
-  method: string,
-  endpoint: string,
+async function getAuthHeaders(
   withAuth: boolean,
-  body?: unknown,
-): Promise<T> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-
-  if (withAuth) {
-    const token = await SecureStore.getItemAsync("userToken");
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
-
-  if (!res.ok) {
-    let data: unknown = {};
-    try {
-      data = await res.json();
-    } catch {
-      // respuesta sin cuerpo
-    }
-    const err: any = new Error(`HTTP ${res.status}`);
-    err.response = { data };
-    throw err;
-  }
-
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+): Promise<Record<string, string>> {
+  if (!withAuth) return {};
+  const token = await SecureStore.getItemAsync("userToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export const apiClient = {
-  get: <T>(endpoint: string, withAuth: boolean) =>
-    request<T>("GET", endpoint, withAuth),
+  get: async <T>(endpoint: string, withAuth: boolean): Promise<T> => {
+    const headers = await getAuthHeaders(withAuth);
+    const { data } = await http.get<T>(endpoint, { headers });
+    return data;
+  },
 
-  post: <T, B = unknown>(endpoint: string, body: B, withAuth: boolean) =>
-    request<T>("POST", endpoint, withAuth, body),
+  post: async <T, B = unknown>(
+    endpoint: string,
+    body: B,
+    withAuth: boolean,
+  ): Promise<T> => {
+    const headers = await getAuthHeaders(withAuth);
+    const { data } = await http.post<T>(endpoint, body, { headers });
+    return data;
+  },
 
-  put: <T, B = unknown>(endpoint: string, body: B, withAuth: boolean) =>
-    request<T>("PUT", endpoint, withAuth, body),
+  put: async <T, B = unknown>(
+    endpoint: string,
+    body: B,
+    withAuth: boolean,
+  ): Promise<T> => {
+    const headers = await getAuthHeaders(withAuth);
+    const { data } = await http.put<T>(endpoint, body, { headers });
+    return data;
+  },
 
-  delete: <T>(endpoint: string, withAuth: boolean) =>
-    request<T>("DELETE", endpoint, withAuth),
+  delete: async <T>(endpoint: string, withAuth: boolean): Promise<T> => {
+    const headers = await getAuthHeaders(withAuth);
+    const { data } = await http.delete<T>(endpoint, { headers });
+    return data;
+  },
 };
