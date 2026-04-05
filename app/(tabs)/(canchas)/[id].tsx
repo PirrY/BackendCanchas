@@ -1,3 +1,4 @@
+import NotaPersonalComponent from "@/src/components/NotaPersonalComponent/NotaPersonalComponent";
 import { HorarioDTO, ReservaRequestDTO } from "@/src/dtos/ReservaDTO";
 import { apiClient } from "@/src/services/ApiClient";
 import { Ionicons } from "@expo/vector-icons";
@@ -200,6 +201,10 @@ export default function CanchaDetalleScreen() {
             </Text>
           </TouchableOpacity>
         )}
+
+        <View style={styles.separador} />
+
+        <NotaPersonalComponent canchaId={Number(id)} />
       </View>
     </ScrollView>
   );
