@@ -1,36 +1,77 @@
 import CanchaCardComponent from "@/src/components/CanchaCardComponent/CanchaCardComponent";
-import { CanchaOutDTO } from "@/src/dtos/CanchaDTO";
+import FiltrosComponent from "@/src/components/FiltrosComponent/FiltrosComponent";
+import { CanchaOutDTO, SedeDTO, TipoCanchaDTO } from "@/src/dtos/CanchaDTO";
 import { apiClient } from "@/src/services/ApiClient";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    FlatList,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 
 export default function CanchasScreen() {
   const [canchas, setCanchas] = useState<CanchaOutDTO[]>([]);
+  const [sedes, setSedes] = useState<SedeDTO[]>([]);
+  const [tipos, setTipos] = useState<TipoCanchaDTO[]>([]);
+
+  const [sedeSeleccionada, setSedeSeleccionada] = useState<number | null>(null);
+  const [tipoSeleccionado, setTipoSeleccionado] = useState<number | null>(null);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    const cargarCanchas = async () => {
+    const cargarCatalogos = async () => {
       try {
-        const data = await apiClient.get<CanchaOutDTO[]>("/canchas", true);
-        setCanchas(data);
+        const sedesData = await apiClient.get<SedeDTO[]>(
+          "/canchas/sedes",
+          true,
+        );
+        const tiposData = await apiClient.get<TipoCanchaDTO[]>(
+          "/canchas/tipos",
+          true,
+        );
+        setSedes(sedesData);
+        setTipos(tiposData);
       } catch (error) {
-        console.error("Error cargando canchas", error);
-      } finally {
-        setCargando(false);
+        console.error("Error cargando catálogos", error);
       }
     };
-    cargarCanchas();
+    cargarCatalogos();
   }, []);
+
+  const cargarCanchas = useCallback(async () => {
+    setCargando(true);
+    try {
+      let url = "/canchas?";
+      if (sedeSeleccionada) url += `sedeId=${sedeSeleccionada}&`;
+      if (tipoSeleccionado) url += `tipoCanchaId=${tipoSeleccionado}`;
+
+      const data = await apiClient.get<CanchaOutDTO[]>(url, true);
+      setCanchas(data);
+    } catch (error) {
+      console.error("Error cargando canchas", error);
+    } finally {
+      setCargando(false);
+    }
+  }, [sedeSeleccionada, tipoSeleccionado]);
+
+  useEffect(() => {
+    cargarCanchas();
+  }, [cargarCanchas]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.tituloHeader}>Explorar Canchas</Text>
+
+      <FiltrosComponent
+        sedes={sedes}
+        tipos={tipos}
+        sedeSeleccionada={sedeSeleccionada}
+        tipoSeleccionado={tipoSeleccionado}
+        onSedeChange={setSedeSeleccionada}
+        onTipoChange={setTipoSeleccionado}
+      />
 
       {cargando ? (
         <ActivityIndicator size="large" color="#e10000" style={styles.loader} />
@@ -41,7 +82,7 @@ export default function CanchasScreen() {
           renderItem={({ item }) => <CanchaCardComponent cancha={item} />}
           contentContainerStyle={styles.listaPadding}
           ListEmptyComponent={
-            <Text style={styles.empty}>No hay canchas disponibles.</Text>
+            <Text style={styles.empty}>No hay canchas con esos filtros.</Text>
           }
         />
       )}
