@@ -20,6 +20,7 @@ public class ReservaService {
     private final CanchaRepository canchaRepository;
     private final UsuarioRepository usuarioRepository;
 
+    // Consultar horarios disponibles excluyendo los ocupados
     public List<Horario> obtenerHorariosDisponibles(Long canchaId, LocalDate fecha) {
         List<Horario> todosLosHorarios = horarioRepository.findAll();
         List<Long> horariosOcupados = reservaRepository.findByCanchaIdAndFecha(canchaId, fecha)
@@ -32,6 +33,7 @@ public class ReservaService {
                 .collect(Collectors.toList());
     }
 
+    // Crear una nueva reserva
     @Transactional
     public ReservaResponseDTO crearReserva(ReservaRequestDTO request, String correoUsuario) {
         if (reservaRepository.existsByCanchaIdAndHorarioIdAndFecha(
@@ -56,6 +58,7 @@ public class ReservaService {
         return mapearAReservaDTO(reservaGuardada);
     }
 
+    // Consultar reservas del usuario
     public List<ReservaResponseDTO> obtenerMisReservas(String correoUsuario) {
         Usuario usuario = usuarioRepository.findByCorreo(correoUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -66,6 +69,7 @@ public class ReservaService {
                 .collect(Collectors.toList());
     }
 
+    // Cancelar reserva
     @Transactional
     public void cancelarReserva(Long idReserva) {
         reservaRepository.deleteById(idReserva);

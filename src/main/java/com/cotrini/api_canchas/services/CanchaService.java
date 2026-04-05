@@ -17,6 +17,7 @@ public class CanchaService {
     private final SedeRepository sedeRepository;
     private final TipoCanchaRepository tipoCanchaRepository;
 
+    // Métodos para poblar los filtros
     public List<SedeDTO> obtenerSedes() {
         return sedeRepository.findAll().stream().map(sede -> {
             SedeDTO dto = new SedeDTO();
@@ -35,6 +36,7 @@ public class CanchaService {
         }).collect(Collectors.toList());
     }
 
+    // Listar canchas con filtros
     public List<CanchaResponseDTO> obtenerCanchas(Long sedeId, Long tipoCanchaId) {
         List<Cancha> canchas;
 
