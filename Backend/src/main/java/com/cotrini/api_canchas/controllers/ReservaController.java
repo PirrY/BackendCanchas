@@ -36,4 +36,16 @@ public class ReservaController {
         reservaService.cancelarReserva(id);
         return ResponseEntity.ok("Reserva cancelada con éxito");
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ReservaResponseDTO> editarReserva(
+            @PathVariable Long id,
+            @RequestBody ReservaRequestDTO request,
+            Principal principal) {
+        // Extraemos el correo del JWT tal como lo haces en los otros métodos
+        String correoUsuario = (principal != null) ? principal.getName() : "test@test.com";
+
+        ReservaResponseDTO reservaActualizada = reservaService.editarReserva(id, request, correoUsuario);
+        return ResponseEntity.ok(reservaActualizada);
+    }
 }

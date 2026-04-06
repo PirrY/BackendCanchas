@@ -14,6 +14,6 @@ export interface CanchaOutDTO {
   descripcion: string;
   capacidad: number;
   imagenUrl: string;
-  sede: SedeDTO;
-  tipoCanchaDTO: TipoCanchaDTO;
+  nombreSede: string;
+  nombreTipoCancha: string;
 }

@@ -30,9 +30,9 @@ export default function CanchaCardComponent({ cancha }: Props) {
       <Image source={{ uri: cancha.imagenUrl }} style={styles.imagen} />
       <View style={styles.info}>
         <Text style={styles.nombre}>{cancha.nombre}</Text>
-        <Text style={styles.sede}>{cancha.sede.nombre}</Text>
+        <Text style={styles.sede}>{cancha.nombreSede}</Text>
         <View style={styles.fila}>
-          <Text style={styles.tipo}>{cancha.tipoCanchaDTO.nombre}</Text>
+          <Text style={styles.tipo}>{cancha.nombreTipoCancha}</Text>
           <View style={styles.capacidadBadge}>
             <Ionicons name="people" size={14} color="#666" />
             <Text style={styles.capacidad}> {cancha.capacidad}</Text>

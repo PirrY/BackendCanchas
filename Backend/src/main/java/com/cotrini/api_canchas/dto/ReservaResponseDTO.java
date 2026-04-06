@@ -7,6 +7,7 @@ import java.time.LocalTime;
 @Data
 public class ReservaResponseDTO {
     private Long idReserva;
+    private Long canchaId;
     private LocalDate fecha;
     private String nombreCancha;
     private String nombreSede;

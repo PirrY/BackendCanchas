@@ -78,6 +78,7 @@ public class ReservaService {
     private ReservaResponseDTO mapearAReservaDTO(Reserva reserva) {
         ReservaResponseDTO dto = new ReservaResponseDTO();
         dto.setIdReserva(reserva.getId());
+        dto.setCanchaId(reserva.getCancha().getId());
         dto.setFecha(reserva.getFecha());
         dto.setNombreCancha(reserva.getCancha().getNombre());
         dto.setNombreSede(reserva.getCancha().getSede().getNombre());
@@ -85,5 +86,44 @@ public class ReservaService {
         dto.setHoraInicio(reserva.getHorario().getHoraInicio());
         dto.setHoraFin(reserva.getHorario().getHoraFin());
         return dto;
+    }
+
+    // Editar una reserva existente
+    @Transactional
+    public ReservaResponseDTO editarReserva(Long idReserva, ReservaRequestDTO request, String correoUsuario) {
+        Reserva reservaActual = reservaRepository.findById(idReserva)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+        if (!reservaActual.getUsuario().getCorreo().equals(correoUsuario)) {
+            throw new RuntimeException("No tienes permiso para editar esta reserva");
+        }
+
+        boolean cambiaHorario = !reservaActual.getHorario().getId().equals(request.getHorarioId());
+        boolean cambiaFecha = !reservaActual.getFecha().equals(request.getFecha());
+        boolean cambiaCancha = !reservaActual.getCancha().getId().equals(request.getCanchaId());
+
+        if (cambiaHorario || cambiaFecha || cambiaCancha) {
+            if (reservaRepository.existsByCanchaIdAndHorarioIdAndFecha(
+                    request.getCanchaId(), request.getHorarioId(), request.getFecha())) {
+                throw new RuntimeException("El nuevo horario ya está reservado para esa fecha");
+            }
+
+            if (cambiaHorario) {
+                Horario nuevoHorario = horarioRepository.findById(request.getHorarioId())
+                        .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+                reservaActual.setHorario(nuevoHorario);
+            }
+            if (cambiaCancha) {
+                Cancha nuevaCancha = canchaRepository.findById(request.getCanchaId())
+                        .orElseThrow(() -> new RuntimeException("Cancha no encontrada"));
+                reservaActual.setCancha(nuevaCancha);
+            }
+            if (cambiaFecha) {
+                reservaActual.setFecha(request.getFecha());
+            }
+        }
+
+        Reserva reservaActualizada = reservaRepository.save(reservaActual);
+        return mapearAReservaDTO(reservaActualizada);
     }
 }

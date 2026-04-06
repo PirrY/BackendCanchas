@@ -4,11 +4,11 @@ import { CanchaOutDTO, SedeDTO, TipoCanchaDTO } from "@/src/dtos/CanchaDTO";
 import { apiClient } from "@/src/services/ApiClient";
 import { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 export default function CanchasScreen() {
